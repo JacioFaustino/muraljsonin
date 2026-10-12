@@ -1,0 +1,62 @@
+<nav class="trilha" aria-label="Você está aqui">
+  <ol>
+    <li><a href="/">Início</a></li>
+    <li><a href="/avisos">Avisos</a></li>
+    <li aria-current="page">registro {{aviso.id}}</li>
+  </ol>
+</nav>
+
+<div class="detalhe">
+  <article class="detalhe__principal">
+    <h1>{{aviso.titulo}}</h1>
+
+    <dl class="campos">
+      <div class="campo">
+        <dt>Título</dt>
+        <dd>{{aviso.titulo}}</dd>
+      </div>
+      <div class="campo">
+        <dt>Setor</dt>
+        <dd>{{aviso.setor}}</dd>
+      </div>
+      <div class="campo">
+        <dt>Prioridade</dt>
+        <dd>
+          <span class="selo selo--{{classePrioridade aviso.prioridade}}">
+            {{aviso.prioridade}}
+          </span>
+        </dd>
+      </div>
+      <div class="campo">
+        <dt>Data</dt>
+        <dd>
+          <time datetime="{{aviso.data}}">{{formatarData aviso.data}}</time>
+        </dd>
+      </div>
+      <div class="campo campo--mensagem">
+        <dt>Mensagem</dt>
+        <dd>{{aviso.mensagem}}</dd>
+      </div>
+    </dl>
+  </article>
+
+  <div class="detalhe__coluna">
+    <aside class="detalhe__lateral" aria-labelledby="titulo-lateral">
+      <h2 id="titulo-lateral">Informação principal</h2>
+      <p class="detalhe__selo">
+        <span class="selo selo--{{classePrioridade aviso.prioridade}}">
+          <span class="apenas-leitor">Prioridade:</span>
+          {{aviso.prioridade}}
+        </span>
+      </p>
+      <p>
+        Este aviso foi classificado como prioridade
+        <strong>{{aviso.prioridade}}</strong> pelo setor responsável
+        ({{aviso.setor}}), com publicação em
+        <time datetime="{{aviso.data}}">{{formatarData aviso.data}}</time>.
+      </p>
+    </aside>
+
+    <a class="botao botao--contorno" href="/avisos">Voltar para a lista</a>
+  </div>
+</div>

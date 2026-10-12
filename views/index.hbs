@@ -1,0 +1,40 @@
+<section class="inicio">
+  <div class="inicio__texto">
+    <h1>Explore os avisos acadêmicos</h1>
+    <p class="inicio__chamada">
+      Informações organizadas para a comunidade escolar. Consulte os registros,
+      acompanhe prazos e veja todos os detalhes de cada comunicado.
+    </p>
+    <a class="botao" href="/avisos">Acessar listagem</a>
+  </div>
+
+  <figure class="area-visual">
+    <img
+      src="/images/aviso-academico.svg"
+      alt="Ilustração de um megafone anunciando avisos em um quadro de recados"
+      width="400"
+      height="261"
+    >
+  </figure>
+</section>
+
+<section class="destaques" aria-labelledby="titulo-destaques">
+  <h2 id="titulo-destaques">Destaques do portal</h2>
+
+  {{#if destaques.length}}
+    <div class="destaques__grade">
+      {{#each destaques}}
+        <article class="destaque">
+          <h3>{{titulo}}</h3>
+          <p class="destaque__meta">
+            Setor: {{setor}} ·
+            <time datetime="{{data}}">{{formatarData data}}</time>
+          </p>
+          <a class="botao botao--contorno" href="/avisos/{{id}}">Ver detalhes</a>
+        </article>
+      {{/each}}
+    </div>
+  {{else}}
+    <p class="estado-vazio">Nenhum registro foi encontrado.</p>
+  {{/if}}
+</section>

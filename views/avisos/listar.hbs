@@ -1,0 +1,21 @@
+<header class="titulo-pagina">
+  <div class="titulo-pagina__topo">
+    <h1>{{titulo}}</h1>
+    <p class="contador">
+      <strong>{{quantidade}}</strong> {{rotuloQuantidade}}
+    </p>
+  </div>
+</header>
+
+{{#if registros.length}}
+  <section class="lista-avisos" aria-label="Lista de avisos">
+    {{#each registros}}
+      {{> componente-avisos-academicos}}
+    {{/each}}
+  </section>
+{{else}}
+  <section class="estado-vazio">
+    <h2>Nenhum registro foi encontrado.</h2>
+    <p>Assim que um aviso for publicado, ele aparecerá nesta listagem.</p>
+  </section>
+{{/if}}

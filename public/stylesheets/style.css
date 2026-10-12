@@ -1,0 +1,661 @@
+/* Avisos Acadêmicos — Grupo 01
+   Identidade visual construída a partir dos quatro wireframes do grupo.
+   Paleta de referência: #b45309 (laranja), #243447 (escuro),
+   #f7f9fb (fundo), #eef3f7 (painel claro), #667788 (texto secundário),
+   #d9e1e8 (bordas discretas) e #ffffff (superfícies). */
+
+:root {
+  /* Laranja/âmbar da identidade do grupo */
+  --laranja-700: #b45309; /* cor principal, extraída do wireframe */
+  --laranja-900: #7c2d12; /* textos do selo de prioridade média */
+  --laranja-300: #fdba74; /* fundo do selo de prioridade média */
+  --laranja-100: #ffedd5; /* fundo do trecho de código no 404 */
+  /* Tons neutros */
+  --escuro: #243447; /* títulos, contornos e textos fortes */
+  --muted: #667788; /* textos secundários */
+  --fundo: #f7f9fb; /* fundo geral das páginas */
+  --painel: #eef3f7; /* área visual e painel lateral */
+  --branco: #ffffff; /* cartões e superfícies */
+  --borda: #d9e1e8; /* divisórias discretas */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: Inter, "Segoe UI", system-ui, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--escuro);
+  background: var(--fundo);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  color: var(--escuro);
+  line-height: 1.2;
+}
+
+p {
+  margin: 0 0 14px;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+a {
+  color: var(--laranja-700);
+}
+
+a:focus-visible,
+button:focus-visible,
+.botao:focus-visible {
+  outline: 3px solid var(--escuro);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.limite {
+  width: min(1300px, calc(100% - 48px));
+  margin-inline: auto;
+}
+
+/* Conteúdo apenas para leitores de tela: mantém o rótulo do indicador
+   disponível sem alterar a composição visual do wireframe. */
+.apenas-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Cabeçalho ------------------------------------------------------------ */
+
+.cabecalho {
+  position: relative;
+  background: var(--branco);
+  border-bottom: 2px solid var(--escuro);
+}
+
+/* Faixa laranja que acompanha toda a altura do cabeçalho, como no wireframe. */
+.cabecalho::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 13px;
+  background: var(--laranja-700);
+}
+
+.cabecalho__conteudo {
+  width: 100%;          /* NOVO: ocupa a largura toda da janela */
+  margin-inline: 0;     /* NOVO: cancela a centralização do .limite */
+  padding-inline: 32px; /* NOVO: respiro da faixa laranja até a borda direita */
+  min-height: 69px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.marca {
+  color: var(--escuro);
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.menu a {
+  color: var(--escuro);
+  font-size: 1.06rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 3px solid transparent;
+}
+
+.menu a:hover,
+.menu a:focus-visible {
+  border-bottom-color: var(--laranja-700);
+}
+
+.conteudo-principal {
+  flex: 1;
+  padding-block: 24px 56px;
+}
+
+.rotulo {
+  color: var(--laranja-700);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Botões --------------------------------------------------------------- */
+
+.botao {
+  display: inline-block;
+  padding: 15px 31px;
+  border: 2px solid var(--laranja-700);
+  border-radius: 8px;
+  color: var(--branco);
+  background: var(--laranja-700);
+  font-size: 1.06rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+}
+
+.botao:hover,
+.botao:focus-visible {
+  background: var(--laranja-900);
+  border-color: var(--laranja-900);
+}
+
+.botao--contorno {
+  color: var(--laranja-700);
+  background: var(--branco);
+}
+
+.botao--contorno:hover,
+.botao--contorno:focus-visible {
+  color: var(--branco);
+  background: var(--laranja-700);
+  border-color: var(--laranja-700);
+}
+
+/* Selos de prioridade (cor + texto, nunca apenas a cor) ----------------- */
+
+.selo {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 15px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.selo--alta {
+  color: var(--branco);
+  background: var(--laranja-700);
+  border-color: var(--laranja-700);
+}
+
+.selo--media {
+  color: var(--laranja-900);
+  background: var(--laranja-300);
+  border-color: var(--laranja-700);
+}
+
+.selo--baixa {
+  color: var(--laranja-900);
+  background: var(--branco);
+  border-style: dashed;
+  border-color: var(--laranja-700);
+}
+
+/* Página inicial ------------------------------------------------------- */
+
+.inicio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 471px;
+  gap: 56px;
+  align-items: center;
+  margin-top: 22px;
+}
+
+.inicio h1 {
+  font-size: clamp(1.9rem, 3.2vw, 2.75rem);
+  margin-bottom: 12px;
+}
+
+.inicio__chamada {
+  max-width: 620px;
+  color: var(--muted);
+  font-size: 1.06rem;
+}
+
+.inicio .botao {
+  margin-top: 28px;
+}
+
+.area-visual {
+  display: grid;
+  place-items: center;
+  min-height: 256px;
+  margin: 0;
+  padding: 28px;
+  border: 2px solid var(--laranja-700);
+  border-radius: 16px;
+  background: var(--painel);
+}
+
+.area-visual img {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+}
+
+.destaques {
+  margin-top: 48px;
+}
+
+.destaques h2 {
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+}
+
+.destaques__grade {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 48px;
+}
+
+.destaque {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 22px 24px 26px 35px;
+  border: 2px solid var(--escuro);
+  border-radius: 10px;
+  background: var(--branco);
+  overflow: hidden;
+}
+
+.destaque::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 11px;
+  background: var(--laranja-700);
+}
+
+.destaque h3 {
+  font-size: 1.38rem;
+}
+
+.destaque__meta {
+  margin: 4px 0 22px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+/* O botão fica no rodapé do cartão, alinhado entre os três destaques. */
+.destaque .botao {
+  margin-top: auto;
+  padding: 10px 24px;
+  font-size: 1rem;
+}
+
+/* Listagem ------------------------------------------------------------- */
+
+.titulo-pagina {
+  margin-bottom: 48px;
+}
+
+.titulo-pagina__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.titulo-pagina h1 {
+  font-size: clamp(1.9rem, 2.6vw, 2.25rem);
+}
+
+.contador {
+  margin: 0;
+  padding: 3px 17px;
+  border-radius: 999px;
+  color: var(--branco);
+  background: var(--laranja-700);
+  font-size: 0.92rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.lista-avisos {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.aviso-linha {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  min-height: 146px;
+  padding: 26px 30px 26px 43px;
+  border: 2px solid var(--escuro);
+  border-radius: 10px;
+  background: var(--branco);
+  overflow: hidden;
+}
+
+.aviso-linha::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 13px;
+  background: var(--laranja-700);
+}
+
+.aviso-linha h2 {
+  font-size: 1.4rem;
+}
+
+.aviso-linha__meta {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.aviso-linha__acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  text-align: right;
+}
+
+.aviso-linha__acoes .botao {
+  min-width: 176px;
+  padding: 11px 32px;
+}
+
+/* Detalhamento --------------------------------------------------------- */
+
+.trilha {
+  margin-bottom: 18px;
+}
+
+.trilha ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.trilha li + li::before {
+  content: "/";
+  margin-right: 8px;
+  color: var(--borda);
+}
+
+.trilha a {
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.trilha a:hover,
+.trilha a:focus-visible {
+  color: var(--laranja-700);
+  text-decoration: underline;
+}
+
+.detalhe {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 341px;
+  gap: 48px;
+  align-items: start;
+}
+
+.detalhe__principal {
+  padding: 24px 40px 40px;
+  border: 2px solid var(--escuro);
+  border-top: 16px solid var(--laranja-700);
+  border-radius: 10px;
+  background: var(--branco);
+}
+
+.detalhe__principal h1 {
+  font-size: clamp(1.9rem, 2.6vw, 2.25rem);
+}
+
+.campos {
+  margin: 44px 0 0;
+}
+
+.campo {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 16px;
+  padding-block: 26px 20px;
+  border-bottom: 1px solid var(--borda);
+}
+
+.campo dt {
+  font-weight: 700;
+  color: var(--escuro);
+}
+
+.campo dd {
+  margin: 0;
+  color: var(--muted);
+}
+
+.campo--mensagem dd {
+  white-space: pre-line;
+}
+
+.campo--mensagem dt {
+  color: var(--escuro);
+}
+
+.detalhe__coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 118px;
+}
+
+.detalhe__lateral {
+  min-height: 300px;
+  padding: 32px 30px 34px;
+  border: 2px solid var(--laranja-700);
+  border-radius: 16px;
+  background: var(--painel);
+}
+
+.detalhe__lateral h2 {
+  font-size: 1.28rem;
+}
+
+.detalhe__selo {
+  margin: 18px 0 16px;
+}
+
+.detalhe__lateral p {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.detalhe__lateral strong {
+  color: var(--escuro);
+}
+
+/* Mensagens do sistema (404 e 500) ------------------------------------- */
+
+.mensagem-sistema {
+  max-width: 621px;
+  margin: 36px auto 0;
+  padding: 56px 48px 80px;
+  border: 3px solid var(--laranja-700);
+  border-radius: 16px;
+  background: var(--branco);
+  text-align: center;
+}
+
+.mensagem-sistema .codigo-erro {
+  margin: 0;
+  color: var(--laranja-700);
+  font-size: 4.75rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mensagem-sistema h1 {
+  margin: 26px 0 0;
+  font-size: 1.9rem;
+}
+
+.mensagem-sistema p {
+  margin: 16px 0 0;
+  color: var(--muted);
+}
+
+.mensagem-sistema .botao {
+  margin-top: 46px;
+  padding: 17px 32px;
+}
+
+.mensagem-sistema__endereco {
+  margin-top: 10px;
+  font-size: 0.92rem;
+}
+
+code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--laranja-100);
+  color: var(--laranja-900);
+  word-break: break-word;
+}
+
+.estado-vazio {
+  padding: 36px;
+  border: 2px dashed var(--laranja-700);
+  border-radius: 10px;
+  background: var(--branco);
+  text-align: center;
+}
+
+/* Rodapé --------------------------------------------------------------- */
+
+.rodape {
+  padding-block: 18px 24px;
+  color: var(--muted);
+}
+
+.rodape__conteudo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-top: 14px;
+  border-top: 1px solid var(--borda);
+}
+
+.rodape p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+/* Responsividade ------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .inicio {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .area-visual {
+    min-height: 220px;
+  }
+
+  .destaques__grade {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+  }
+
+  .detalhe {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 720px) {
+  .limite {
+    width: min(1300px, calc(100% - 32px));
+  }
+
+  .cabecalho__conteudo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding-block: 14px;
+  }
+
+  .conteudo-principal {
+    padding-block: 28px 40px;
+  }
+
+  .destaques__grade {
+    grid-template-columns: 1fr;
+  }
+
+  .aviso-linha {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 22px 22px 26px 33px;
+  }
+
+  .aviso-linha::before {
+    width: 11px;
+  }
+
+  .aviso-linha__acoes {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .campo {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .detalhe__principal {
+    padding: 26px 22px 30px;
+  }
+
+  .mensagem-sistema {
+    padding: 40px 22px 48px;
+  }
+}

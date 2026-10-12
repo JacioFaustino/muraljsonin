@@ -1,0 +1,17 @@
+<article class="aviso-linha">
+  <div class="aviso-linha__texto">
+    <h2>{{titulo}}</h2>
+    <p class="aviso-linha__meta">
+      Setor: {{setor}} · Publicado em
+      <time datetime="{{data}}">{{formatarData data}}</time>
+    </p>
+  </div>
+
+  <div class="aviso-linha__acoes">
+    <span class="selo selo--{{classePrioridade prioridade}}">
+      <span class="apenas-leitor">Prioridade:</span>
+      {{prioridade}}
+    </span>
+    <a class="botao botao--contorno" href="/avisos/{{id}}">Abrir</a>
+  </div>
+</article>

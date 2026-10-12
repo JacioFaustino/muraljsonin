@@ -1,0 +1,49 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="28 44 300 196"
+  role="img"
+  aria-labelledby="tituloIlustracao descricaoIlustracao"
+>
+  <title id="tituloIlustracao">Avisos acadêmicos</title>
+  <desc id="descricaoIlustracao">
+    Ilustração de um megafone anunciando avisos fixados em um quadro de recados.
+  </desc>
+
+  <defs>
+    <linearGradient id="gradMegafone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ea7317" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+  </defs>
+
+  <!-- quadro de recados -->
+  <rect x="196" y="52" width="124" height="150" rx="12" fill="#ffffff" stroke="#243447" stroke-width="3" />
+  <rect x="196" y="52" width="124" height="18" rx="12" fill="#243447" />
+
+  <rect x="212" y="86" width="92" height="30" rx="6" fill="#fdba74" />
+  <rect x="222" y="97" width="60" height="8" rx="4" fill="#7c2d12" />
+
+  <rect x="212" y="126" width="92" height="30" rx="6" fill="#fff7ed" stroke="#fdba74" stroke-width="2" />
+  <rect x="222" y="137" width="52" height="8" rx="4" fill="#b45309" />
+
+  <rect x="212" y="166" width="92" height="24" rx="6" fill="#fff7ed" stroke="#fdba74" stroke-width="2" />
+  <rect x="222" y="174" width="40" height="8" rx="4" fill="#b45309" />
+
+  <!-- pino / alfinete -->
+  <circle cx="258" cy="60" r="6" fill="#c2410c" />
+
+  <!-- megafone -->
+  <g>
+    <path d="M60 150 L128 118 L128 190 L60 168 Z" fill="url(#gradMegafone)" />
+    <rect x="36" y="146" width="28" height="34" rx="8" fill="#b45309" />
+    <path d="M112 190 L112 232" stroke="#b45309" stroke-width="12" stroke-linecap="round" />
+    <path d="M56 168 L56 196" stroke="#b45309" stroke-width="12" stroke-linecap="round" />
+    <path d="M40 208 L84 208" stroke="#b45309" stroke-width="10" stroke-linecap="round" />
+  </g>
+
+  <!-- ondas sonoras -->
+  <g fill="none" stroke="#ea7317" stroke-width="6" stroke-linecap="round">
+    <path d="M152 118 a34 34 0 0 1 0 46" />
+    <path d="M170 100 a62 62 0 0 1 0 82" />
+  </g>
+</svg>
