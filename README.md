@@ -1,243 +1,49 @@
-# Avisos Acadêmicos
+### Estágio atual — Front-end (painel web)
 
-Aplicação web que reúne comunicados, prazos e orientações da comunidade escolar.
+- Interfaces em **HTML5, CSS3 e JavaScript puro** (sem framework e sem etapa de build), com **Chart.js 4.4.1 embutido no projeto** — os gráficos funcionam sem internet, o que garante a demonstração na apresentação.
+- **Autenticação e sessão**: tela de login consumindo o `POST /api/auth/login`; o token JWT fica na sessão do navegador, é enviado como `Authorization: Bearer` em todas as requisições e é descartado no logout; sessão expirada (401) redireciona para o login.
+- **Perfis de acesso na interface**: os botões de criar/editar configurações aparecem apenas para administrador e o encerramento de alerta inclui o técnico — sempre sabendo que a autorização real é feita pela API.
+- **Tratamento amigável de erros**: 401 volta ao login, 403 mostra "acesso negado", 429 pede para aguardar e 500 mostra mensagem genérica (detalhe técnico apenas no console). A interface nunca exibe `token_hash` nem `senha_hash`.
+- **Cinco telas, em navegação por hash**:
+  - *Visão geral*: cartões com total de salas, salas online/offline, consumo do dia, alertas abertos, maior potência e qualidade média do sinal, além da lista de alertas abertos;
+  - *Salas*: lista (status, potência atual, consumo do dia, funcionamento, capacidade e alertas abertos) e detalhe da sala com dados do dispositivo, sensores, alertas, configurações e dois gráficos (potência das últimas leituras e energia por hora);
+  - *Alertas*: filtros por sala, gravidade, status e tipo, com destaque visual para alertas abertos e ação de encerramento;
+  - *Configuração de alertas*: listagem com nomes amigáveis das regras R1 a R8, limite com unidade, persistência, buzzer e status; criação/edição em formulário e ativação/desativação;
+  - *Relatórios*: geração por sala, tipo e período, com histórico e detalhe exibindo consumo total, anomalias e picos de consumo.
+- A interface **já lê os campos novos da API** (consumo diário e mensal, pico de potência, alertas abertos por sala e sensores) — eles aparecem automaticamente, sem alteração no front.
+- Valores e datas formatados em português, sempre com unidade (W, kWh, s, %); a URL da API fica centralizada em um único arquivo de configuração.
+- Documentação de execução (Live Server), estrutura dos arquivos e solução de problemas no README do front-end.
 
-**Grupo 01 — Programação para Internet**
 
-- Jacio Faustino
-- Erick de Lima
-- João Victor
+## Estágio atual — API e banco de dados
 
----
+### Banco de dados (MySQL + Sequelize)
 
-## Problema atendido e público beneficiado
+- Schema completo com **11 tabelas** (`sala`, `dispositivo`, `sensor`, `atuador`, `leitura`, `estado_porta`, `calibracao`, `configuracao_alerta`, `alerta`, `usuario`, `relatorio`), criado e versionado por **migrations** do Sequelize, com chaves estrangeiras e regras de exclusão (`CASCADE`, `SET NULL`, `RESTRICT`).
+- **Índices** para as consultas mais frequentes: `leitura(id_sensor, timestamp)`, `leitura(timestamp)`, `estado_porta(id_sensor, timestamp)`, `dispositivo(ultimo_contato)`, `alerta(status)`, `alerta(id_sala, status)` e `configuracao_alerta(id_sala, status)`.
+- **Seeders** para demonstração: 2 salas, 2 dispositivos ESP32, 4 sensores (sensor de corrente SCT-013 e reed switch por sala), 2 atuadores (buzzer), 40 leituras (20 por sala), estados de porta, 9 configurações de alerta (R1 a R8, incluindo R3A/R3B) e usuário administrador.
+- Modelo de autenticação de dispositivo: cada dispositivo tem `token_hash` (SHA-256) e `intervalo_envio_segundos`; o token puro nunca é armazenado.
+- O banco é **reprodutível do zero** com `db:migrate` + `db:seed:all`.
 
-Avisos importantes da escola (matrículas, reuniões, prazos de estágio, mudanças de
-calendário) costumam circular por murais físicos, grupos de mensagem e bilhetes, o que
-dificulta saber **o que é urgente** e **desde quando** o comunicado está valendo.
+### API (Node.js + Express + Sequelize)
 
-Esta aplicação centraliza esses comunicados em um portal único, indicando o **setor
-responsável**, a **data de publicação** e a **prioridade** de cada aviso. O público
-beneficiado é a comunidade escolar: estudantes, responsáveis, professores e os setores
-administrativos que publicam os avisos.
+- API REST em JSON, com **autenticação dupla**: usuários por **JWT** (senha com bcrypt, expiração de 8h) e dispositivos por **token próprio** (gerado com `crypto`, armazenado apenas como hash SHA-256, exibido uma única vez, com endpoints de geração e revogação).
+- **Perfis de acesso**: rotas de escrita restritas a administrador (configurações de alertas, dispositivos) e encerramento de alertas também para técnico.
+- **Validação de entrada com Zod** em todas as rotas com corpo, tratamento de erros centralizado e códigos HTTP padronizados (400, 401, 403, 404, 429, 500, 503).
+- **Limite de requisições**: login (10 por 15 min) e envio de leituras (120 por minuto).
+- **Endpoints implementados**: teste de conexão; login; salas (lista e consumo por hora com filtro de data); dispositivos (listar, cadastrar, gerar/revogar token); leituras (envio pelo ESP32 e consultas com filtros e paginação); alertas (listar com filtros de status, gravidade, tipo, sala e período; buscar; encerrar); configurações de alertas (listar, criar, editar, ativar/desativar); relatórios (gerar, listar, detalhar).
+- `GET /api/salas` devolve, por sala: dados cadastrais, status online/offline do dispositivo, último estado da porta, **consumo do dia e do mês**, **pico de potência do dia**, **contagem de alertas abertos** e a **lista de sensores**.
+- **Regras de anomalia R1 a R8 implementadas**: R1, R2, R3A, R3B, R4, R5, R6 e R8 são avaliadas na ingestão de cada leitura; R7 (dispositivo offline) em verificação periódica a cada 30 segundos.
+- **Ciclo de vida dos alertas** `PENDENTE → ABERTO → FECHADO`, com tempo de persistência configurável por regra (o alerta só "abre" se a condição se mantiver pelo tempo configurado).
+- **Controle do buzzer** pelo retorno do próprio `POST /api/leituras` (campo `comandos`), em modelo **baseado em estado** reafirmado a cada leitura — tolerante a perda de pacotes — com supressão automática do buzzer da R3A quando a R3B dispara.
+- **Relatórios**: consumo total do período, picos de consumo (10 maiores potências por hora) e contagem de anomalias, com histórico persistido.
+- **Testes automatizados** (`node:test`): unitários e de integração cobrindo as regras R1 a R6 e R8, o ciclo de persistência de alertas, os filtros de alertas e as agregações de salas/sensores.
 
-## Entidade principal e campos
+### Em desenvolvimento — API e banco de dados
 
-A entidade é **`Aviso`**, definida em `models/aviso.js` e persistida na tabela `avisos`.
+- **Histórico de calibração dos sensores**: a tabela e o modelo já existem; faltam as rotas e o serviço para registrar calibrações e aplicar o fator de correção nas leituras.
+- **Notificações automáticas**: o campo `acao_automatica` é armazenado, mas nenhuma ação é executada — não há envio de avisos (e-mail ou push) implementado.
+- **Geração de arquivo de relatório (PDF/CSV)** e **cálculo de custo estimado**: hoje os relatórios registram consumo total, picos e anomalias, mas sem arquivo gerado (campos `arquivo_path` e `custo_estimado` ficam vazios).
+- **Endurecimento de segurança para implantação**: restrição das origens permitidas na API (hoje o CORS está liberado, adequado apenas para desenvolvimento).
 
-| Campo | Tipo Sequelize | Obrigatório | Finalidade |
-|---|---|---|---|
-| `id` | INTEGER (chave primária, auto incremento) | sim | Identificador do registro |
-| `titulo` | STRING(120) | sim | Identificar o aviso |
-| `setor` | STRING(80) | sim | Informar o setor responsável |
-| `prioridade` | STRING(10) | sim | Alta, Média ou Baixa |
-| `data` | DATEONLY | sim | Data de publicação |
-| `mensagem` | TEXT | sim | Comunicado completo |
 
-Validações aplicadas: `notEmpty` em `titulo`, `setor` e `mensagem`, tamanho mínimo de 3
-caracteres em `titulo` e `isIn: [["Alta", "Média", "Baixa"]]` em `prioridade`.
-
-## Tecnologias utilizadas
-
-- **Node.js** — execução do servidor
-- **Express** — rotas, middlewares e arquivos estáticos
-- **express-handlebars** — renderização das páginas no servidor
-- **Sequelize** — modelagem e consultas
-- **SQLite** — banco de dados em arquivo
-- **Supertest + Node Test** — testes automatizados
-
-## Pré-requisitos
-
-- Node.js 18 ou superior (`node -v`)
-- NPM (`npm -v`)
-
-## Instalação das dependências
-
-```bash
-npm install
-```
-
-## Execução do servidor
-
-```bash
-npm start
-```
-
-A aplicação fica disponível em <http://localhost:3000>. O endereço também é exibido no
-terminal ao iniciar. Para desenvolvimento com reinício automático:
-
-```bash
-npm run dev
-```
-
-A porta pode ser alterada pela variável de ambiente `PORT`.
-
-Na primeira execução, o arquivo `database/avisos.sqlite` é criado automaticamente com
-**seis registros iniciais**. A inserção só acontece quando a tabela está vazia, então os
-dados **não são duplicados** ao reiniciar o servidor.
-
-## Execução dos testes
-
-```bash
-npm test
-```
-
-A suíte cobre a página inicial, os destaques vindos do banco, o endpoint de saúde, a
-listagem, a ordenação por data, o detalhamento, os campos obrigatórios, os identificadores
-inválidos e inexistentes, a página 404 e os arquivos estáticos.
-
-## Rotas disponíveis
-
-| Método e rota | Resposta |
-|---|---|
-| `GET /` | Página inicial, com três avisos em destaque vindos do banco |
-| `GET /saude` | Diagnóstico em JSON: `{ "status": "ok" }` |
-| `GET /avisos` | Listagem de todos os avisos, da data mais recente para a mais antiga |
-| `GET /avisos/:id` | Detalhamento de um aviso (404 quando o identificador é inválido ou não existe) |
-| Rota desconhecida | Página 404 contextualizada |
-| Erro interno | Página 500, sem detalhes técnicos para o usuário |
-
-## Organização dos diretórios
-
-```
-.
-├── app.js                 Configuração do Express, Handlebars, middlewares, rotas e erros
-├── server.js              Sincronização do banco, dados iniciais e inicialização
-├── package.json
-├── package-lock.json
-├── README.md
-├── models/
-│   ├── index.js           Conexão com o SQLite e carregamento do modelo
-│   └── aviso.js           Entidade Aviso, campos e validações
-├── routes/
-│   ├── index.js           Página inicial e endpoint de saúde
-│   └── avisos.js          Listagem e detalhamento dos avisos
-├── views/
-│   ├── layouts/main.hbs
-│   ├── partials/componente-avisos-academicos.hbs
-│   ├── avisos/listar.hbs
-│   ├── avisos/detalhar.hbs
-│   ├── index.hbs
-│   ├── 404.hbs
-│   └── erro.hbs
-├── public/
-│   ├── images/aviso-academico.svg
-│   └── stylesheets/style.css
-├── database/
-│   └── avisos.sqlite      Criado automaticamente na primeira execução
-├── capturas/              Capturas de tela das quatro páginas (entrega)
-└── test/app.test.js
-```
-
-> A pasta `instrucoes/` reúne o PDF e os wireframes fornecidos pelo professor para o
-> desenvolvimento do trabalho.
-
-## Correspondência com os quatro wireframes
-
-| Wireframe | Página da aplicação | O que foi implementado |
-|---|---|---|
-| Página inicial | `GET /` | Composição dividida: título **Explore os avisos acadêmicos** e texto de boas-vindas à esquerda, área visual emoldurada à direita, botão **Acessar listagem** que conduz a `/avisos` e a seção **Destaques do portal** com três avisos recuperados do banco |
-| Listagem | `GET /avisos` | Blocos horizontais, um por aviso, com faixa laranja à esquerda, título, setor, data, selo de prioridade e botão **Abrir**; contador de registros no topo e mensagem de lista vazia |
-| Detalhamento | `GET /avisos/:id` | Painel principal à esquerda com barra laranja no topo, os cinco campos separados por linhas e a mensagem completa; painel lateral à direita reforçando a prioridade e botão **Voltar para a lista** fora do painel; trilha de navegação com o identificador |
-| Erro 404 | rota desconhecida ou identificador inválido | Cartão central contornado em laranja com o código 404, a mensagem **Aviso indisponível**, explicação do problema com o endereço consultado e botão **Retornar com segurança** para `/avisos` |
-
-## Decisões e adaptações realizadas pelo grupo
-
-- **Entidade renomeada para `Aviso`.** O projeto de referência da Aula 02 tratava de
-  publicações do mural; aqui a entidade, os arquivos (`models/aviso.js`,
-  `routes/avisos.js`, `views/avisos/`) e os identificadores foram reescritos para o
-  domínio de avisos acadêmicos, sem resíduos do projeto original.
-- **Ordenação por data decrescente.** O critério de ordenação é a data de publicação, do
-  mais recente para o mais antigo. A prioridade define o **indicador visual** (o selo),
-  não a ordem da listagem.
-- **Selo de prioridade com cor e texto.** Os três níveis (Alta, Média e Baixa) têm cores
-  e formatos diferentes, mas sempre acompanhados do texto — a informação de estado não
-  depende apenas da cor.
-- **Campo `data` como `DATEONLY`.** Como o sistema trabalha com datas de publicação (sem
-  horário), esse tipo evita deslocamentos de fuso horário. O helper `formatarData`
-  apresenta o valor no formato `dd/mm/aaaa` a partir do texto retornado pelo banco.
-- **Consultas com `raw: true`.** O Handlebars não acessa propriedades que ficam no
-  protótipo das instâncias do Sequelize; com `raw: true` as consultas devolvem objetos
-  simples, que o template consegue ler.
-- **Menu sem o item "Sobre".** Para não existir link sem destino, o menu apresenta apenas
-  **Início** e **Lista**. O cabeçalho mantém a identidade do projeto.
-- **Middleware próprio.** Toda requisição é registrada no terminal com método e endereço,
-  auxiliando a explicar o percurso da requisição.
-- **Erro 500 sem detalhes técnicos.** Stack traces e mensagens do banco ficam apenas no
-  terminal do servidor; a interface informa somente que ocorreu uma falha inesperada.
-- **Identidade visual extraída dos wireframes.** A paleta do CSS foi levantada a partir
-  das próprias imagens de referência em `instrucoes/`: laranja `#b45309`, escuro
-  `#243447`, fundo `#f7f9fb`, painel claro `#eef3f7`, texto secundário `#667788` e
-  divisórias `#d9e1e8`. A composição também segue as medidas dos wireframes — faixa
-  laranja de 13 px no cabeçalho, cartões horizontais de 146 px com faixa laranja à
-  esquerda, painel lateral de 341 px no detalhamento e botões com contorno laranja.
-- **Selo de prioridade com cor, texto e rótulo acessível.** As três prioridades têm cores
-  e formatos diferentes (Alta preenchida, Média em âmbar, Baixa apenas contornada). O
-  rótulo "Prioridade" continua na página, mas em um elemento visível apenas para leitores
-  de tela (`.apenas-leitor`), para que a leitura do wireframe não seja alterada sem
-  perder a informação — o nível aparece escrito no selo, sem depender da cor.
-- **Área visual com ilustração real.** O wireframe trazia a marcação "ÁREA VISUAL"; no
-  lugar dela ficou uma ilustração em SVG (megafone e quadro de recados) salva em
-  `public/images/aviso-academico.svg`, referenciada pelo caminho público
-  `/images/aviso-academico.svg` e com texto alternativo descritivo.
-- **Rótulos reais no lugar das marcações.** Textos como "Wireframe temático",
-  "Valor demonstrativo de título" e "Aviso em destaque" foram substituídos pelos dados do
-  banco: setor, data de publicação e prioridade reais de cada aviso.
-- **Página 404 com o endereço consultado.** Além da mensagem prevista no wireframe
-  ("404 / Aviso indisponível"), o cartão informa discretamente qual endereço foi
-  solicitado, em um bloco `code`, sem expor stack trace, SQL ou caminhos internos.
-- **Foco visível e contraste.** Os botões de contorno mantêm contraste suficiente nos
-  estados normal, `hover` e foco de teclado.
-- **Testes com Supertest.** Os testes foram reescritos para o domínio de avisos e cobrem
-  também os identificadores inválidos, garantindo que um endereço malformado resulte em
-  404 — e não em erro interno.
-
-## Acessibilidade e responsividade
-
-- documento com `lang="pt-BR"` e uso de `header`, `nav`, `main` e `footer`;
-- um único `h1` por página e hierarquia de títulos sem saltos;
-- foco visível em links e botões e navegação possível por teclado;
-- textos de ação que indicam o destino ("Acessar listagem", "Abrir", "Voltar para a
-  lista", "Retornar com segurança");
-- imagem com texto alternativo e ícones decorativos marcados com `aria-hidden`;
-- indicador de prioridade lido como "Prioridade: Alta" por leitores de tela, mesmo que a
-  palavra "Prioridade" não apareça visualmente no selo;
-- layout em colunas que reduz para duas e depois uma conforme a largura da tela; no
-  celular, o painel lateral do detalhamento passa para baixo do conteúdo principal e os
-  blocos da listagem deixam de ficar lado a lado;
-- as capturas de tela documentadas em `capturas/` foram conferidas em 1375 px, 820 px e
-  390 px de largura, sem transbordo horizontal.
-
-## Solução de problemas
-
-**`npm install` falha ao compilar o `sqlite3`.** Esse pacote é nativo: ele tenta baixar um
-binário pronto e, se não conseguir, compila do zero. Nesse caso é preciso ter as
-ferramentas de compilação instaladas:
-
-- **Windows:** Python 3 e o Visual Studio Build Tools com a carga de trabalho
-  "Desenvolvimento para desktop com C++";
-- **Linux:** `build-essential` e `python3` (`sudo apt install build-essential python3`);
-- **macOS:** Xcode Command Line Tools (`xcode-select --install`).
-
-**Porta 3000 ocupada.** Execute com outra porta:
-
-```bash
-PORT=3001 npm start
-```
-
-**Recomeçar do zero com os dados iniciais.** Pare o servidor, apague o arquivo
-`database/avisos.sqlite` e inicie novamente: o banco é recriado e os seis registros são
-inseridos outra vez.
-
-## Capturas de tela (entrega)
-
-As capturas das quatro telas devem ser salvas na pasta `capturas/`, com os nomes:
-
-| Arquivo | Tela |
-|---|---|
-| `01-pagina-inicial.png` | `http://localhost:3000/` |
-| `02-listagem.png` | `http://localhost:3000/avisos` |
-| `03-detalhamento.png` | `http://localhost:3000/avisos/1` |
-| `04-erro-404.png` | `http://localhost:3000/rota-inexistente` |
-
-Com o servidor em execução, basta abrir cada endereço e salvar a captura da janela.
